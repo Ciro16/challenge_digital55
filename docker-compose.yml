@@ -1,0 +1,42 @@
+services:
+  frontend:
+    image: node:20-alpine
+    working_dir: /usr/src/app
+    volumes:
+      - ./frontend:/usr/src/app
+    command: npm run dev
+    ports:
+      - "8000:8000"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3000/api/
+
+  backend:
+    image: node:20-alpine
+    working_dir: /usr/src/app
+    volumes:
+      - ./backend:/usr/src/app
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=database
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=mysecretpassword
+      - DB_NAME=challenge_db
+    depends_on:
+      - database
+
+  database:
+    image: postgres:16.3-alpine3.20
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: challenge_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./dataset:/docker-entrypoint-initdb.d
+
+volumes:
+  db_data:
